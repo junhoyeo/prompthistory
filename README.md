@@ -177,13 +177,13 @@ git clone https://github.com/junhoyeo/prompthistory.git
 cd prompthistory
 
 # Install dependencies
-pnpm install
+bun install
 
 # Build
-pnpm build
+bun run build
 
 # Test locally
-pnpm dev search "test"
+bun run dev search "test"
 ```
 
 ## Tech Stack

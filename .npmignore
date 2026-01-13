@@ -1,0 +1,33 @@
+# Source files (we only publish dist/)
+src/
+tests/
+
+# Config files
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+
+# Development files
+notepad.md
+.gitkeep
+**/*.gitkeep
+
+# GitHub specific
+.github/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Lock files (consumers use their own)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
