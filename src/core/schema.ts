@@ -20,7 +20,7 @@ export const HistoryEntrySchema = z
     project: z.string(),
     sessionId: z.string().regex(UUID_REGEX).optional(),
   })
-  .passthrough();
+  .catchall(z.unknown());
 
 export type ParsedHistoryEntry = z.infer<typeof HistoryEntrySchema>;
 
