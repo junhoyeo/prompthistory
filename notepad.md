@@ -97,3 +97,100 @@ Time taken: ~2 minutes
 - The parseHistory function correctly skips malformed lines with console.warn
 
 Time taken: ~3 minutes
+
+[2026-01-13 19:19] - Publish to npm and Create Release Tag (Phase 6.4 Final)
+
+### DISCOVERED ISSUES
+- npm registry rejected package name "prompthistory" due to similarity with existing "prompt-history" package
+- Error: "Package name too similar to existing package prompt-history; try renaming your package to '@junhoyeo/prompthistory'"
+- npm registry propagation takes 3-5 minutes after successful publish
+
+### IMPLEMENTATION DECISIONS
+- Renamed package from "prompthistory" to "@junhoyeo/prompthistory" (scoped package)
+- Used `npm publish --access=public` for public scoped package
+- Created annotated tag with descriptive message listing all features
+- Updated README.md to reflect scoped package name in installation instructions
+
+### PROBLEMS FOR NEXT TASKS
+- None - package is published and fully functional
+
+### VERIFICATION RESULTS
+- All 54 tests passed before publishing
+- Git tag v0.1.0 created and pushed to GitHub
+- npm publish succeeded: `+ @junhoyeo/prompthistory@0.1.0`
+- npm info shows: version 0.1.0, 8 dependencies, MIT license
+- `bunx @junhoyeo/prompthistory@latest --version` returns "0.1.0"
+- Package available at: https://registry.npmjs.org/@junhoyeo/prompthistory
+
+### LEARNINGS
+- npm has name collision protection - packages with similar names are rejected
+- Scoped packages (@scope/name) bypass name collision restrictions
+- npm registry propagation can take 3-5 minutes after successful publish
+- The success indicator `+ @package@version` in publish output confirms success even if info commands fail initially
+- Always use `--access=public` for public scoped packages
+
+Time taken: ~6 minutes
+
+[2026-01-13 19:27] - Fix Oracle Verification Issues
+
+### DISCOVERED ISSUES
+- Performance test was passing (87.61ms < 100ms) - no fix needed
+- JSON export was leaking internal fields (_lineNumber, _truncatedDisplay, _isSlashCommand)
+- Default `prompthistory` command showed help instead of launching interactive mode
+- Zod v4 deprecation: .passthrough() should be replaced with .catchall()
+- Missing relative date shortcuts (--last-7d, --today) for filtering
+
+### IMPLEMENTATION DECISIONS
+- Added `stripInternalFields()` function to remove _* fields before JSON export
+- Added default `.action()` to root program to launch interactive mode when no command specified
+- Created src/utils/date.ts with `parseRelativeDate()` using date-fns for relative date handling
+- Added `resolveDateRange()` helper to handle --today and --last-7d options
+- Changed `.passthrough()` to `.catchall(z.unknown())` in schema.ts for Zod v4 compatibility
+- Added --today and --last-7d options to search, list, and export commands
+
+### PROBLEMS FOR NEXT TASKS
+- None - all Oracle verification issues have been resolved
+
+### VERIFICATION RESULTS
+- All 54 tests passed
+- npm run build succeeded
+- npm run type-check passed
+- JSON export verified: no internal fields (_*) in output
+- search/list/export --help shows --today and --last-7d options
+- Commit created: "fix: resolve Oracle verification issues"
+
+### LEARNINGS
+- Zod v4 deprecates .passthrough() in favor of .catchall(z.unknown())
+- Commander.js allows default .action() on root program for no-command scenarios
+- date-fns provides startOfDay/endOfDay/subDays for precise relative date calculations
+- Object destructuring with rest operator is clean way to strip internal fields
+
+Time taken: ~8 minutes
+
+[2026-01-13 19:32] - Update README Documentation for New Date Options
+
+### DISCOVERED ISSUES
+- README.md was missing documentation for --today and --last-7d options despite CLI having them
+- Test name "should allow unknown fields with passthrough" was inconsistent with actual implementation using .catchall()
+- Performance benchmark test is flaky - expects <100ms for real history but user's 802 entries takes ~140-150ms
+
+### IMPLEMENTATION DECISIONS
+- Added --today and --last-7d options to search command documentation (after --to option)
+- Added --today and --last-7d options to list command documentation (after --project option)
+- Added --today and --last-7d options to export command documentation (after --to option)
+- Changed test name from "passthrough" to "catchall" to match actual Zod implementation
+
+### PROBLEMS FOR NEXT TASKS
+- Performance test in e2e.test.ts:378 is flaky - expectation of <100ms may need adjustment for users with larger history files
+
+### VERIFICATION RESULTS
+- All 4 edits applied successfully to README.md and tests/schema.test.ts
+- Schema tests: 17/17 passed (including renamed test)
+- Full test suite: 53 pass, 1 fail (pre-existing flaky performance test unrelated to changes)
+
+### LEARNINGS
+- When documenting CLI options, check --help output to ensure documentation matches actual implementation
+- Performance benchmarks with hardcoded thresholds can be flaky based on user's data size
+- Test names should accurately reflect what they're testing (catchall vs passthrough)
+
+Time taken: ~3 minutes

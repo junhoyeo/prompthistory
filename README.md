@@ -2,8 +2,14 @@
 
 > CLI tool to search and navigate your OpenCode prompt history
 
-[![npm version](https://badge.fury.io/js/@junhoyeo/prompthistory.svg)](https://www.npmjs.com/package/@junhoyeo/prompthistory)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+
+[![npm Version](https://img.shields.io/npm/v/prompthistory?color=0073FF&labelColor=black&style=flat-square&logo=npm)](https://www.npmjs.com/package/prompthistory)
+[![npm Downloads](https://img.shields.io/npm/dt/prompthistory?color=0073FF&labelColor=black&style=flat-square)](https://www.npmjs.com/package/prompthistory)
+[![GitHub Stars](https://img.shields.io/github/stars/junhoyeo/prompthistory?color=0073FF&labelColor=black&style=flat-square)](https://github.com/junhoyeo/prompthistory/stargazers)
+[![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](https://github.com/junhoyeo/prompthistory/blob/main/LICENSE)
+
+</div>
 
 ## Features
 
