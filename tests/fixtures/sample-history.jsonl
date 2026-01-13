@@ -1,0 +1,11 @@
+{"display":"fix the bug in auth module","pastedContents":{},"timestamp":1705147200000,"project":"/Users/user/my-project","sessionId":"550e8400-e29b-41d4-a716-446655440000"}
+{"display":"한국어 프롬프트 테스트입니다. 이것은 UTF-8 인코딩을 확인하기 위한 테스트 항목입니다.","pastedContents":{},"timestamp":1705233600000,"project":"/Users/user/korean-project","sessionId":"550e8400-e29b-41d4-a716-446655440001"}
+{"display":"/rewind","pastedContents":{},"timestamp":1705320000000,"project":"/Users/user/my-project","sessionId":"550e8400-e29b-41d4-a716-446655440002"}
+{"display":"/model claude-3-opus","pastedContents":{},"timestamp":1705406400000,"project":"/Users/user/another-project","sessionId":"550e8400-e29b-41d4-a716-446655440003"}
+{"display":"implement user authentication","pastedContents":{},"timestamp":1705492800000,"project":"/Users/user/my-project","sessionId":"550e8400-e29b-41d4-a716-446655440004"}
+{"display":"implement user authentication","pastedContents":{},"timestamp":1705579200000,"project":"/Users/user/my-project","sessionId":"550e8400-e29b-41d4-a716-446655440005"}
+{"display":"This is a very long prompt that exceeds five hundred characters. It is designed to test how the system handles prompts that are longer than typical user inputs. In real-world usage, users might paste large blocks of code, detailed error messages, or comprehensive descriptions of their problems. This prompt continues to add more text to ensure we meet the 500 character threshold. We need to make sure the parsing logic handles these edge cases gracefully without truncation or memory issues. This should definitely be over 500 characters now.","pastedContents":{},"timestamp":1705665600000,"project":"/Users/user/long-prompt-project","sessionId":"550e8400-e29b-41d4-a716-446655440006"}
+{"display":"legacy entry without sessionId","pastedContents":{},"timestamp":1705752000000,"project":"/Users/user/old-project"}
+{"display":"another legacy format entry","pastedContents":{},"timestamp":1705838400000,"project":"/Users/user/legacy-project"}
+{"display":"Incomplete prompt","timestamp":1705924800000
+{"display":"final valid entry with special chars: <>&\"'","pastedContents":{},"timestamp":1706011200000,"project":"/Users/user/special-project","sessionId":"550e8400-e29b-41d4-a716-446655440009"}
