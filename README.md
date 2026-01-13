@@ -2,7 +2,7 @@
 
 > CLI tool to search and navigate your OpenCode prompt history
 
-[![npm version](https://badge.fury.io/js/prompthistory.svg)](https://www.npmjs.com/package/prompthistory)
+[![npm version](https://badge.fury.io/js/@junhoyeo/prompthistory.svg)](https://www.npmjs.com/package/@junhoyeo/prompthistory)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
@@ -21,13 +21,13 @@
 
 ```bash
 # Using npm
-npm install -g prompthistory
+npm install -g @junhoyeo/prompthistory
 
 # Using pnpm
-pnpm add -g prompthistory
+pnpm add -g @junhoyeo/prompthistory
 
 # Using bunx (no install needed)
-bunx prompthistory
+bunx @junhoyeo/prompthistory
 ```
 
 ## Usage

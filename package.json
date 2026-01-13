@@ -1,5 +1,5 @@
 {
-  "name": "prompthistory",
+  "name": "@junhoyeo/prompthistory",
   "version": "0.1.0",
   "description": "CLI tool to search and navigate OpenCode prompt history",
   "type": "module",
