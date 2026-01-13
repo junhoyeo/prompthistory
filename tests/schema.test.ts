@@ -90,7 +90,7 @@ describe('HistoryEntrySchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should allow unknown fields with passthrough', () => {
+  it('should allow unknown fields with catchall', () => {
     const entry = {
       display: 'test prompt',
       pastedContents: {},

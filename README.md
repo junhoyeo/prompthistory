@@ -73,6 +73,8 @@ Search through your prompt history with optional filters.
 - `-p, --project <project>` - Filter by project path (partial match)
 - `-f, --from <date>` - Filter from date (YYYY-MM-DD)
 - `-t, --to <date>` - Filter to date (YYYY-MM-DD)
+- `--today` - Filter to today only
+- `--last-7d` - Filter to last 7 days
 - `-l, --limit <number>` - Limit number of results (default: 20)
 - `-u, --unique` - Show only unique prompts (deduplicate)
 - `-c, --copy` - Copy selected result to clipboard
@@ -105,6 +107,8 @@ List recent prompts without searching.
 **Options:**
 - `-l, --limit <number>` - Number of prompts to show (default: 10)
 - `-p, --project <project>` - Filter by project path
+- `--today` - Filter to today only
+- `--last-7d` - Filter to last 7 days
 - `--include-slash-commands` - Include slash commands
 
 **Examples:**
@@ -145,6 +149,8 @@ Export search results to a file or stdout.
 - `-p, --project <project>` - Filter by project path
 - `-f, --from <date>` - Filter from date (YYYY-MM-DD)
 - `-t, --to <date>` - Filter to date (YYYY-MM-DD)
+- `--today` - Filter to today only
+- `--last-7d` - Filter to last 7 days
 - `-l, --limit <number>` - Limit number of results (default: 100)
 - `--format <format>` - Output format: `json`, `csv`, or `txt` (default: json)
 - `-o, --output <path>` - Output file path (prints to stdout if not specified)
