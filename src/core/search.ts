@@ -1,10 +1,12 @@
 import Fuse from 'fuse.js';
-import type { HistoryEntry, SearchOptions, SearchResult } from '../types/history.js';
+import type { EnrichedEntry, SearchOptions, SearchResult } from '../types/history.js';
 
 export class HistorySearchEngine {
-  private fuse: Fuse<HistoryEntry>;
+  private fuse: Fuse<EnrichedEntry>;
+  private entries: EnrichedEntry[];
 
-  constructor(entries: HistoryEntry[]) {
+  constructor(entries: EnrichedEntry[]) {
+    this.entries = entries;
     this.fuse = new Fuse(entries, {
       keys: ['display', 'project'],
       threshold: 0.3,
@@ -30,11 +32,8 @@ export class HistorySearchEngine {
         })),
       }));
     } else {
-      const allEntries: HistoryEntry[] = [];
-      for (const item of (this.fuse as any)._docs) {
-        allEntries.push(item);
-      }
-      results = allEntries.map((entry) => ({ entry }));
+      // Use stored entries array instead of accessing Fuse internals
+      results = this.entries.map((entry) => ({ entry }));
     }
 
     // Apply filters
@@ -64,7 +63,9 @@ export class HistorySearchEngine {
       filtered = filtered.filter((r) => r.entry.timestamp >= options.from!.getTime());
     }
     if (options.to) {
-      filtered = filtered.filter((r) => r.entry.timestamp <= options.to!.getTime());
+      // Add end-of-day (23:59:59.999) to include the entire day
+      const endOfDay = options.to!.getTime() + 86399999;
+      filtered = filtered.filter((r) => r.entry.timestamp <= endOfDay);
     }
 
     // Filter out slash commands

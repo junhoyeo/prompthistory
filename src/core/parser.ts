@@ -1,9 +1,10 @@
 import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
-import type { HistoryEntry } from '../types/history.js';
+import type { EnrichedEntry } from '../types/history.js';
+import { parseEntry } from './schema.js';
 
-export async function parseHistory(filePath: string): Promise<HistoryEntry[]> {
-  const entries: HistoryEntry[] = [];
+export async function parseHistory(filePath: string): Promise<EnrichedEntry[]> {
+  const entries: EnrichedEntry[] = [];
   
   const fileStream = createReadStream(filePath);
   const rl = createInterface({
@@ -11,15 +12,14 @@ export async function parseHistory(filePath: string): Promise<HistoryEntry[]> {
     crlfDelay: Infinity,
   });
 
+  let lineNumber = 0;
   for await (const line of rl) {
+    lineNumber++;
     if (!line.trim()) continue;
     
-    try {
-      const entry = JSON.parse(line) as HistoryEntry;
+    const entry = parseEntry(line, lineNumber);
+    if (entry) {
       entries.push(entry);
-    } catch (error) {
-      // Skip malformed lines
-      console.warn('Skipping malformed line:', line.substring(0, 50));
     }
   }
 

@@ -13,6 +13,9 @@
 - 🎨 **Beautiful output** - formatted tables with colors
 - ⚡ **Fast** - streaming parser handles large history files efficiently
 - 🧹 **Smart filtering** - automatically excludes slash commands, optional deduplication
+- 📋 **Clipboard support** - copy any prompt with `--copy`
+- 🖱️ **Interactive mode** - arrow key navigation with `--interactive`
+- 📤 **Export** - save results as JSON, CSV, or plain text
 
 ## Installation
 
@@ -72,6 +75,8 @@ Search through your prompt history with optional filters.
 - `-t, --to <date>` - Filter to date (YYYY-MM-DD)
 - `-l, --limit <number>` - Limit number of results (default: 20)
 - `-u, --unique` - Show only unique prompts (deduplicate)
+- `-c, --copy` - Copy selected result to clipboard
+- `-i, --interactive` - Interactive mode with arrow key navigation
 - `--include-slash-commands` - Include slash commands in results (excluded by default)
 
 **Examples:**
@@ -88,6 +93,9 @@ prompthistory search "bug" --from 2026-01-01
 
 # Deduplicated results
 prompthistory search "refactor" --unique --limit 10
+
+# Interactive mode with copy
+prompthistory search "api" --interactive --copy
 ```
 
 ### `prompthistory list`
@@ -116,11 +124,42 @@ prompthistory list --project my-project --limit 20
 
 Show detailed information about a specific prompt by its index from search/list results.
 
-**Example:**
+**Options:**
+- `-c, --copy` - Copy prompt to clipboard
+
+**Examples:**
 
 ```bash
 prompthistory list --limit 5
 prompthistory show 3
+
+# Copy prompt to clipboard
+prompthistory show 3 --copy
+```
+
+### `prompthistory export [query]`
+
+Export search results to a file or stdout.
+
+**Options:**
+- `-p, --project <project>` - Filter by project path
+- `-f, --from <date>` - Filter from date (YYYY-MM-DD)
+- `-t, --to <date>` - Filter to date (YYYY-MM-DD)
+- `-l, --limit <number>` - Limit number of results (default: 100)
+- `--format <format>` - Output format: `json`, `csv`, or `txt` (default: json)
+- `-o, --output <path>` - Output file path (prints to stdout if not specified)
+
+**Examples:**
+
+```bash
+# Export as JSON to stdout
+prompthistory export --limit 50 --format json
+
+# Export to file
+prompthistory export --format csv --output prompts.csv
+
+# Export filtered results
+prompthistory export "api" --project my-project --format txt -o api-prompts.txt
 ```
 
 ## Data Source
@@ -152,7 +191,10 @@ pnpm dev search "test"
 - **CLI Framework**: [Commander.js](https://github.com/tj/commander.js)
 - **Fuzzy Search**: [Fuse.js](https://fusejs.io)
 - **Output Formatting**: [chalk](https://github.com/chalk/chalk), [cli-table3](https://github.com/cli-table/cli-table3)
+- **Interactive UI**: [@inquirer/prompts](https://github.com/SBoudrias/Inquirer.js)
+- **Clipboard**: [clipboardy](https://github.com/sindresorhus/clipboardy)
 - **Date Handling**: [date-fns](https://date-fns.org)
+- **Schema Validation**: [Zod](https://zod.dev)
 - **Build Tool**: [tsup](https://tsup.egoist.dev)
 
 ## License

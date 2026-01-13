@@ -46,7 +46,7 @@ export interface SearchOptions {
 }
 
 export interface SearchResult {
-  entry: HistoryEntry;
+  entry: EnrichedEntry;
   score?: number;
   matches?: Array<{
     key: string;
