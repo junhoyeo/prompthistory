@@ -146,6 +146,7 @@ program
   .option('-i, --interactive', 'interactive mode with arrow key navigation')
   .action(async (query, options) => {
     try {
+      const startTime = performance.now();
       const entries = await parseHistory(DEFAULT_HISTORY_PATH);
       const searchEngine = new HistorySearchEngine(entries);
 
@@ -161,6 +162,7 @@ program
       };
 
       const results = searchEngine.search(searchOptions);
+      const elapsed = performance.now() - startTime;
 
       if (options.interactive || options.copy) {
         const selected = await interactiveSelect(results);
@@ -173,7 +175,7 @@ program
         }
       } else {
         console.log(formatSearchResults(results));
-        console.log(chalk.dim(`\nFound ${results.length} results`));
+        console.log(chalk.dim(`\nFound ${results.length} results in ${elapsed.toFixed(0)}ms`));
       }
     } catch (error) {
       console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
@@ -193,6 +195,7 @@ program
   .option('--include-slash-commands', 'include slash commands in results')
   .action(async (options) => {
     try {
+      const startTime = performance.now();
       const entries = await parseHistory(DEFAULT_HISTORY_PATH);
       const sorted = entries
         .sort((a, b) => b.timestamp - a.timestamp);
@@ -206,8 +209,10 @@ program
         limit: parseInt(options.limit, 10),
         includeSlashCommands: options.includeSlashCommands,
       });
+      const elapsed = performance.now() - startTime;
 
       console.log(formatSearchResults(results));
+      console.log(chalk.dim(`\nLoaded ${entries.length} prompts in ${elapsed.toFixed(0)}ms`));
     } catch (error) {
       console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
       process.exit(1);
