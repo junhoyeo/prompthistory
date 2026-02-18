@@ -17,7 +17,7 @@
 - 📁 **Filter by project** - find prompts from specific projects
 - 📅 **Date range filtering** - search within time ranges
 - 🎨 **Beautiful output** - formatted tables with colors
-- ⚡ **Fast** - streaming parser handles large history files efficiently
+- ⚡ **Fast** - native SQLite queries for instant results
 - 🧹 **Smart filtering** - automatically excludes slash commands, optional deduplication
 - 📋 **Clipboard support** - copy any prompt with `--copy`
 - 🖱️ **Interactive mode** - arrow key navigation with `--interactive`
@@ -176,10 +176,12 @@ prompthistory export "api" --project my-project --format txt -o api-prompts.txt
 
 ## Data Source
 
-This tool reads from your OpenCode history file:
-- **Location**: `~/.claude/history.jsonl`
-- **Format**: JSON Lines (one JSON object per line)
-- **Read-only**: Never modifies your history file
+This tool reads from your OpenCode SQLite database:
+- **Location**: `~/.local/share/opencode/opencode.db` (OpenCode 1.2+)
+- **Format**: SQLite database with `message`, `part`, `session`, and `project` tables
+- **Read-only**: Opens database in read-only mode
+
+> **Note**: Requires [Bun](https://bun.sh/) runtime due to use of `bun:sqlite` for native SQLite support.
 
 ## Development
 
@@ -200,6 +202,8 @@ bun run dev search "test"
 
 ## Tech Stack
 
+- **Runtime**: [Bun](https://bun.sh/) (required for `bun:sqlite`)
+- **Database**: [bun:sqlite](https://bun.sh/docs/api/sqlite) - Native SQLite bindings
 - **CLI Framework**: [Commander.js](https://github.com/tj/commander.js)
 - **Fuzzy Search**: [Fuse.js](https://fusejs.io)
 - **Output Formatting**: [chalk](https://github.com/chalk/chalk), [cli-table3](https://github.com/cli-table/cli-table3)
@@ -215,7 +219,7 @@ MIT © [junhoyeo](https://github.com/junhoyeo)
 
 ## Related
 
-- [OpenCode](https://github.com/cline/cline) - AI coding assistant
+- [OpenCode](https://github.com/sst/opencode) - AI coding assistant
 - [tokscale](https://github.com/junhoyeo/tokscale) - Track token usage from coding agents
 
 ## Contributing

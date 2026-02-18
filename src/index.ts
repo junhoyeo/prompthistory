@@ -5,13 +5,22 @@ import { writeFileSync } from 'node:fs';
 import chalk from 'chalk';
 import clipboard from 'clipboardy';
 import { select } from '@inquirer/prompts';
-import { parseHistory } from './core/parser.js';
+import { parseHistory, getOpenCodeDbPath, openCodeDbExists } from './core/parser.js';
 import { HistorySearchEngine } from './core/search.js';
 import { formatSearchResults, formatDetailedResult } from './utils/formatter.js';
 import { parseRelativeDate } from './utils/date.js';
 import type { SearchOptions, SearchResult } from './types/history.js';
 
-const DEFAULT_HISTORY_PATH = join(homedir(), '.claude', 'history.jsonl');
+const LEGACY_HISTORY_PATH = join(homedir(), '.claude', 'history.jsonl');
+
+function getDefaultHistoryPath(): string {
+  if (openCodeDbExists()) {
+    return getOpenCodeDbPath();
+  }
+  return LEGACY_HISTORY_PATH;
+}
+
+const DEFAULT_HISTORY_PATH = getDefaultHistoryPath();
 
 interface DateOptions {
   from?: string;
@@ -47,7 +56,7 @@ function exportResults(results: SearchResult[], format: string, outputPath?: str
     case 'json':
       content = JSON.stringify(results.map(r => stripInternalFields(r.entry)), null, 2);
       break;
-    case 'csv':
+    case 'csv': {
       const headers = 'timestamp,project,display,sessionId';
       const rows = results.map(r => {
         const e = r.entry;
@@ -56,6 +65,7 @@ function exportResults(results: SearchResult[], format: string, outputPath?: str
       });
       content = [headers, ...rows].join('\n');
       break;
+    }
     case 'txt':
     default:
       content = results.map(r => r.entry.display).join('\n\n---\n\n');

@@ -1,9 +1,26 @@
-import { createReadStream } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import type { EnrichedEntry } from '../types/history.js';
 import { parseEntry } from './schema.js';
+import { parseOpenCodeHistory, getOpenCodeDbPath, openCodeDbExists } from './opencode-parser.js';
+
+export { parseOpenCodeHistory, getOpenCodeDbPath, openCodeDbExists };
 
 export async function parseHistory(filePath: string): Promise<EnrichedEntry[]> {
+  if (filePath.endsWith('.db') || filePath.endsWith('opencode.db')) {
+    return parseOpenCodeHistory(filePath);
+  }
+
+  if (filePath === getOpenCodeDbPath() || !existsSync(filePath)) {
+    if (openCodeDbExists()) {
+      return parseOpenCodeHistory();
+    }
+  }
+
+  return parseHistoryJsonl(filePath);
+}
+
+export async function parseHistoryJsonl(filePath: string): Promise<EnrichedEntry[]> {
   const entries: EnrichedEntry[] = [];
   
   const fileStream = createReadStream(filePath);
