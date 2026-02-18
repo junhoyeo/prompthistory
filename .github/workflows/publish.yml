@@ -1,0 +1,119 @@
+name: Publish
+run-name: "${{ format('release {0}', inputs.version || inputs.bump) }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        default: "patch (x.x.X)"
+        options:
+          - "patch (x.x.X)"
+          - "minor (x.X.0)"
+          - "major (X.0.0)"
+      version:
+        description: "Override version (e.g., 2.0.0-beta.1). Takes precedence over bump."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Calculate version
+        id: bump
+        run: |
+          CURRENT_VERSION=$(jq -r '.version' package.json)
+          echo "Current version: $CURRENT_VERSION"
+          
+          if [ -n "${{ inputs.version }}" ]; then
+            NEW_VERSION="${{ inputs.version }}"
+            echo "Using override version: $NEW_VERSION"
+          else
+            BASE="${CURRENT_VERSION%%-*}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+            
+            case "${{ inputs.bump }}" in
+              "major (X.0.0)")
+                NEW_VERSION="$((MAJOR + 1)).0.0"
+                ;;
+              "minor (x.X.0)")
+                NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+                ;;
+              *)
+                NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+                ;;
+            esac
+            echo "Bump type: ${{ inputs.bump }}"
+          fi
+          echo "New version: $NEW_VERSION"
+          
+          jq --arg v "$NEW_VERSION" '.version = $v' package.json > tmp.json && mv tmp.json package.json
+          echo "Updated package.json"
+          
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build
+        run: bun run build
+
+      - name: Publish to npm
+        run: bun publish --access public
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push version bump
+        run: |
+          NEW_VERSION="${{ steps.bump.outputs.version }}"
+          git add package.json
+          git commit -m "chore: bump version to $NEW_VERSION"
+          git push
+
+      - name: Create tag and GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_VERSION="${{ steps.bump.outputs.version }}"
+          
+          if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then
+            echo "Tag v$NEW_VERSION already exists"
+          else
+            git tag "v$NEW_VERSION"
+            git push origin "v$NEW_VERSION"
+            echo "Created tag v$NEW_VERSION"
+          fi
+
+          if gh release view "v$NEW_VERSION" >/dev/null 2>&1; then
+            echo "Release v$NEW_VERSION already exists"
+          else
+            gh release create "v$NEW_VERSION" \
+              --title "v$NEW_VERSION" \
+              --generate-notes
+            echo "Created GitHub release v$NEW_VERSION"
+          fi
