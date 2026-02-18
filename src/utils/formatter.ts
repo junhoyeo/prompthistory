@@ -3,7 +3,11 @@ import Table from 'cli-table3';
 import { formatDistanceToNow } from 'date-fns';
 import type { SearchResult } from '../types/history.js';
 
-export function formatSearchResults(results: SearchResult[], detailed = false): string {
+interface FormatOptions {
+  truncate?: boolean;
+}
+
+export function formatSearchResults(results: SearchResult[], options: FormatOptions = {}): string {
   if (results.length === 0) {
     return chalk.yellow('No results found');
   }
@@ -16,7 +20,7 @@ export function formatSearchResults(results: SearchResult[], detailed = false): 
 
   results.forEach((result, index) => {
     const { entry } = result;
-    const display = truncate(entry.display, 200);
+    const display = options.truncate ? truncate(entry.display, 200) : entry.display;
     const project = entry.project.split('/').pop() || entry.project;
     const timeAgo = formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true });
 

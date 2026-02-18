@@ -142,6 +142,7 @@ program
   .option('-l, --limit <number>', 'limit number of results', '20')
   .option('-u, --unique', 'show only unique prompts')
   .option('--include-slash-commands', 'include slash commands in results')
+  .option('--truncate', 'truncate long prompts in output')
   .option('-c, --copy', 'copy selected result to clipboard')
   .option('-i, --interactive', 'interactive mode with arrow key navigation')
   .action(async (query, options) => {
@@ -174,7 +175,7 @@ program
           console.log(formatDetailedResult(selected));
         }
       } else {
-        console.log(formatSearchResults(results));
+        console.log(formatSearchResults(results, { truncate: options.truncate }));
         console.log(chalk.dim(`\nFound ${results.length} results in ${elapsed.toFixed(0)}ms`));
       }
     } catch (error) {
@@ -193,6 +194,7 @@ program
   .option('--today', 'filter to today only')
   .option('--last-7d', 'filter to last 7 days')
   .option('--include-slash-commands', 'include slash commands in results')
+  .option('--truncate', 'truncate long prompts in output')
   .action(async (options) => {
     try {
       const startTime = performance.now();
@@ -211,7 +213,7 @@ program
       });
       const elapsed = performance.now() - startTime;
 
-      console.log(formatSearchResults(results));
+      console.log(formatSearchResults(results, { truncate: options.truncate }));
       console.log(chalk.dim(`\nLoaded ${entries.length} prompts in ${elapsed.toFixed(0)}ms`));
     } catch (error) {
       console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
