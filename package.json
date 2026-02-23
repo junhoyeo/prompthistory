@@ -5,7 +5,8 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "prompthistory": "dist/index.js"
+    "prompthistory": "dist/index.js",
+    "prompthistory-mcp": "dist/mcp/server.js"
   },
   "files": [
     "dist",
@@ -43,6 +44,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
     "@inquirer/prompts": "^8.2.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
     "clipboardy": "^5.0.2",

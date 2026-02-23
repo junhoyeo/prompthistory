@@ -289,6 +289,70 @@ prompthistory export --format csv --output prompts.csv
 prompthistory export "api" --project my-project --format txt -o api-prompts.txt
 ```
 
+## MCP Server Mode
+
+prompthistory can run as an MCP (Model Context Protocol) server, allowing AI assistants to query your prompt history.
+
+### Installation as MCP Server
+
+Add to your MCP settings (e.g., `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "prompthistory": {
+      "command": "prompthistory-mcp"
+    }
+  }
+}
+```
+
+Or if installed locally:
+
+```json
+{
+  "mcpServers": {
+    "prompthistory": {
+      "command": "bunx",
+      "args": ["@junhoyeo/prompthistory-mcp"]
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+Once configured, AI assistants can use these tools:
+
+#### `search_prompts`
+
+Search through OpenCode prompt history.
+
+**Parameters:**
+- `query` (string, optional): Search query text
+- `project` (string, optional): Filter by project path
+- `from` (string, optional): Filter from date (YYYY-MM-DD)
+- `to` (string, optional): Filter to date (YYYY-MM-DD)
+- `limit` (number, optional): Maximum results (default: 20)
+- `unique` (boolean, optional): Deduplicate results
+
+#### `list_prompts`
+
+List recent prompts.
+
+**Parameters:**
+- `limit` (number, optional): Number of prompts (default: 10)
+- `project` (string, optional): Filter by project path
+- `from` (string, optional): Filter from date (YYYY-MM-DD)
+- `to` (string, optional): Filter to date (YYYY-MM-DD)
+
+#### `get_prompt`
+
+Get a specific prompt by line number.
+
+**Parameters:**
+- `lineNumber` (number, required): Line number from search results
+
 ## Configuration
 
 ### Environment Variables
