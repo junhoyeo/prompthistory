@@ -2,7 +2,7 @@
 
 > CLI tool to search, replay, test, and compare your AI coding assistant prompts
 
-Supports **OpenCode**, **Claude Code**, **Codex**, **Gemini CLI**, **OpenClaw**, and more!
+Supports **OpenCode**, **Claude Code**, **OpenClaw**, **Codex**, **Gemini CLI**, and more!
 
 <div align="center">
 

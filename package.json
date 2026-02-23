@@ -1,7 +1,7 @@
 {
   "name": "@junhoyeo/prompthistory",
   "version": "1.0.0",
-  "description": "CLI tool to search and navigate OpenCode prompt history",
+  "description": "CLI tool to search, replay, test, and compare your AI coding assistant prompts. Supports OpenCode, Claude Code, OpenClaw, Codex, Gemini CLI, and more!",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
