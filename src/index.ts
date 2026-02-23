@@ -24,6 +24,7 @@ import {
 import { compareByIds, displaySideBySide } from './commands/compare.js';
 import { getPromptResult, getPromptResults } from './core/test-db.js';
 import { getDefaultModel } from './core/provider.js';
+import { registerStatsCommand } from './commands/stats.js';
 
 const LEGACY_HISTORY_PATH = join(homedir(), '.claude', 'history.jsonl');
 
@@ -500,5 +501,8 @@ program
       process.exit(1);
     }
   });
+
+// Register stats command
+registerStatsCommand(program);
 
 program.parse();

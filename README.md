@@ -262,6 +262,35 @@ prompthistory results
 prompthistory results --limit 50
 ```
 
+### `prompthistory stats`
+
+Show statistics about your prompt history.
+
+**Options:**
+- `-p, --project <project>` - Filter by project path
+- `-f, --from <date>` - Filter from date (YYYY-MM-DD)
+- `-t, --to <date>` - Filter to date (YYYY-MM-DD)
+
+**Statistics shown:**
+- Total prompts, unique projects, unique sessions
+- Average prompt length
+- Top 5 most active projects with percentages
+- Hourly activity distribution (ASCII bar chart)
+- Top 10 keywords with frequency
+
+**Examples:**
+
+```bash
+# Show all stats
+prompthistory stats
+
+# Stats for specific project
+prompthistory stats --project my-project
+
+# Stats for date range
+prompthistory stats --from 2026-01-01 --to 2026-01-31
+```
+
 ### `prompthistory export [query]`
 
 Export search results to a file or stdout.
