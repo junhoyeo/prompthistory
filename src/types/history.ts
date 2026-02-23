@@ -19,6 +19,7 @@ export interface HistoryEntry {
   timestamp: number;
   project: string;
   sessionId?: string; // Optional - not present in older entries
+  client?: 'opencode' | 'claudecode' | 'codex' | 'gemini' | 'openclaw' | 'cursor' | 'amp' | 'droid' | 'pi' | 'kimi'; // AI coding client
 }
 
 /**

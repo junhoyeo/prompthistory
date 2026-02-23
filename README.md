@@ -1,6 +1,8 @@
 # prompthistory
 
-> CLI tool to search, replay, test, and compare your OpenCode prompts
+> CLI tool to search, replay, test, and compare your AI coding assistant prompts
+
+Supports **OpenCode**, **Claude Code**, **Codex**, **Gemini CLI**, **OpenClaw**, and more!
 
 <div align="center">
 
@@ -393,12 +395,24 @@ export OPENAI_API_KEY="your-key"
 export ANTHROPIC_API_KEY="your-key"
 ```
 
-## Data Source
+## Supported AI Coding Clients
 
-This tool reads from your OpenCode SQLite database:
-- **Location**: `~/.local/share/opencode/opencode.db` (OpenCode 1.2+)
-- **Format**: SQLite database with `message`, `part`, `session`, and `project` tables
-- **Read-only**: Opens database in read-only mode
+prompthistory automatically detects and parses history from multiple AI coding assistants:
+
+| Client | Location | Status |
+|--------|----------|--------|
+| **OpenCode** | `~/.local/share/opencode/opencode.db` | ✅ Full support |
+| **Claude Code** | `~/.claude/projects/` | ✅ Full support |
+| **Codex CLI** | `~/.codex/sessions/` | ✅ Full support |
+| **Gemini CLI** | `~/.gemini/tmp/*/chats/` | ✅ Full support |
+| **OpenClaw** | `~/.openclaw/agents/` | ✅ Full support |
+| **Cursor IDE** | `~/.config/tokscale/cursor-cache/` | 🔜 Coming soon |
+| **Amp** | `~/.local/share/amp/threads/` | 🔜 Coming soon |
+| **Droid** | `~/.factory/sessions/` | 🔜 Coming soon |
+| **Pi** | `~/.pi/agent/sessions/` | 🔜 Coming soon |
+| **Kimi CLI** | `~/.kimi/sessions/` | 🔜 Coming soon |
+
+All history is merged and sorted by timestamp for unified search across all your AI assistants!
 
 > **Note**: Requires [Bun](https://bun.sh/) runtime due to use of `bun:sqlite` for native SQLite support.
 
