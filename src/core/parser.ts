@@ -21,23 +21,35 @@ export async function parseHistory(filePath: string): Promise<EnrichedEntry[]> {
 }
 
 export async function parseHistoryJsonl(filePath: string): Promise<EnrichedEntry[]> {
-  const entries: EnrichedEntry[] = [];
-  
-  const fileStream = createReadStream(filePath);
-  const rl = createInterface({
-    input: fileStream,
-    crlfDelay: Infinity,
-  });
+  if (!existsSync(filePath)) {
+    throw new Error(
+      `History file not found: ${filePath}\n` +
+        `Make sure Claude Code has been used at least once, or specify a valid path with --file.`
+    );
+  }
 
-  let lineNumber = 0;
-  for await (const line of rl) {
-    lineNumber++;
-    if (!line.trim()) continue;
-    
-    const entry = parseEntry(line, lineNumber);
-    if (entry) {
-      entries.push(entry);
+  const entries: EnrichedEntry[] = [];
+  const fileStream = createReadStream(filePath);
+  const rl = createInterface({ input: fileStream, crlfDelay: Infinity });
+
+  try {
+    let lineNumber = 0;
+    for await (const line of rl) {
+      lineNumber++;
+      if (!line.trim()) continue;
+
+      const entry = parseEntry(line, lineNumber);
+      if (entry) {
+        entries.push(entry);
+      }
     }
+  } catch (err) {
+    rl.close();
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'EACCES') {
+      throw new Error(`Permission denied reading history file: ${filePath}`);
+    }
+    throw err;
   }
 
   return entries;

@@ -31,7 +31,12 @@ export function initTestDb(dbPath: string = DEFAULT_DB_PATH): Database {
     mkdirSync(dir, { recursive: true });
   }
 
-  db = new Database(dbPath);
+  try {
+    db = new Database(dbPath);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to open test database at ${dbPath}: ${msg}`);
+  }
 
   // Create tables
   db.exec(`
@@ -139,19 +144,28 @@ export function createTestCase(testCase: Omit<TestCase, 'id' | 'createdAt' | 'up
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  stmt.run(
-    id,
-    testCase.name,
-    testCase.prompt,
-    testCase.expectedPatterns ? JSON.stringify(testCase.expectedPatterns) : null,
-    testCase.expectedNotPatterns ? JSON.stringify(testCase.expectedNotPatterns) : null,
-    testCase.provider || null,
-    testCase.model || null,
-    now,
-    now,
-    testCase.tags ? JSON.stringify(testCase.tags) : null,
-    testCase.description || null
-  );
+  try {
+    stmt.run(
+      id,
+      testCase.name,
+      testCase.prompt,
+      testCase.expectedPatterns ? JSON.stringify(testCase.expectedPatterns) : null,
+      testCase.expectedNotPatterns ? JSON.stringify(testCase.expectedNotPatterns) : null,
+      testCase.provider || null,
+      testCase.model || null,
+      now,
+      now,
+      testCase.tags ? JSON.stringify(testCase.tags) : null,
+      testCase.description || null
+    );
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+      throw new Error(
+        `A test case named "${testCase.name}" already exists. Use a different name or update the existing one.`
+      );
+    }
+    throw err;
+  }
 
   return {
     ...testCase,

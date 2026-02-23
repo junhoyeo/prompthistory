@@ -29,6 +29,39 @@ function generateId(): string {
   return `pr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
+/**
+ * Convert SDK API errors into user-friendly messages.
+ * Both OpenAI and Anthropic SDKs expose a `status` property on errors.
+ */
+function translateApiError(err: unknown, provider: string): Error {
+  if (err instanceof Error) {
+    const status = (err as { status?: number }).status;
+    if (status === 401) {
+      return new Error(
+        `Invalid ${provider} API key. Check that your key is correct and has not expired.`
+      );
+    }
+    if (status === 429) {
+      return new Error(
+        `${provider} rate limit exceeded. Wait a moment and try again, or reduce request frequency.`
+      );
+    }
+    if (status === 400) {
+      return new Error(`${provider} rejected the request: ${err.message}`);
+    }
+    if (status === 500 || status === 502 || status === 503) {
+      return new Error(`${provider} service error (${status}). Try again in a few seconds.`);
+    }
+    // Network-level errors (no status)
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || code === 'ECONNRESET') {
+      return new Error(`Cannot connect to ${provider} API. Check your internet connection.`);
+    }
+    return err;
+  }
+  return new Error(`Unexpected error calling ${provider} API: ${String(err)}`);
+}
+
 export interface LLMProvider {
   name: Provider;
   run(prompt: string, config: ProviderConfig): Promise<PromptResult>;
@@ -54,12 +87,17 @@ export class OpenAIProvider implements LLMProvider {
 
     const startTime = performance.now();
 
-    const response = await client.chat.completions.create({
-      model: config.model,
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: config.maxTokens,
-      temperature: config.temperature,
-    });
+    let response: Awaited<ReturnType<typeof client.chat.completions.create>>;
+    try {
+      response = await client.chat.completions.create({
+        model: config.model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: config.maxTokens,
+        temperature: config.temperature,
+      });
+    } catch (err) {
+      throw translateApiError(err, 'openai');
+    }
 
     const latencyMs = Math.round(performance.now() - startTime);
     const choice = response.choices[0];
@@ -109,11 +147,16 @@ export class AnthropicProvider implements LLMProvider {
 
     const startTime = performance.now();
 
-    const response = await client.messages.create({
-      model: config.model,
-      max_tokens: config.maxTokens || 4096,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    let response: Awaited<ReturnType<typeof client.messages.create>>;
+    try {
+      response = await client.messages.create({
+        model: config.model,
+        max_tokens: config.maxTokens || 4096,
+        messages: [{ role: 'user', content: prompt }],
+      });
+    } catch (err) {
+      throw translateApiError(err, 'anthropic');
+    }
 
     const latencyMs = Math.round(performance.now() - startTime);
 
