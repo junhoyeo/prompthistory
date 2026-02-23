@@ -1,6 +1,6 @@
 {
   "name": "@junhoyeo/prompthistory",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "CLI tool to search and navigate OpenCode prompt history",
   "type": "module",
   "main": "dist/index.js",
