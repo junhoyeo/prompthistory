@@ -10,6 +10,20 @@ import { HistorySearchEngine } from './core/search.js';
 import { formatSearchResults, formatDetailedResult } from './utils/formatter.js';
 import { parseRelativeDate } from './utils/date.js';
 import type { SearchOptions, SearchResult } from './types/history.js';
+import type { Provider } from './types/test.js';
+import { replayPrompt, displayReplayResult, interactiveReplay } from './commands/replay.js';
+import {
+  addTestFromEntry,
+  addTestInteractive,
+  listTests,
+  showTest,
+  removeTest,
+  runTests,
+  runSingleTestByName,
+} from './commands/test.js';
+import { compareByIds, displaySideBySide } from './commands/compare.js';
+import { getPromptResult, getPromptResults } from './core/test-db.js';
+import { getDefaultModel } from './core/provider.js';
 
 const LEGACY_HISTORY_PATH = join(homedir(), '.claude', 'history.jsonl');
 
@@ -280,6 +294,207 @@ program
       const results = searchEngine.search(searchOptions);
       const output = exportResults(results, options.format, options.output);
       console.log(output);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+// ============ REPLAY COMMAND ============
+
+program
+  .command('replay')
+  .description('Re-run a prompt with current/different model')
+  .argument('<index>', 'index from search/list results')
+  .option('--provider <provider>', 'provider to use (openai, anthropic)', 'openai')
+  .option('--model <model>', 'model to use')
+  .option('--temperature <temp>', 'temperature (0.0-2.0)')
+  .option('--max-tokens <tokens>', 'max tokens in response')
+  .option('-i, --interactive', 'interactive mode to select provider/model')
+  .option('--no-save', 'do not save result to database')
+  .action(async (index, options) => {
+    try {
+      const entries = await parseHistory(DEFAULT_HISTORY_PATH);
+      const idx = parseInt(index, 10) - 1;
+
+      if (idx < 0 || idx >= entries.length) {
+        console.error(chalk.red('Error: Invalid index'));
+        process.exit(1);
+      }
+
+      const sorted = entries.sort((a, b) => b.timestamp - a.timestamp);
+      const entry = sorted[idx];
+
+      if (options.interactive) {
+        await interactiveReplay(entry);
+      } else {
+        const provider = options.provider as Provider;
+        const model = options.model || getDefaultModel(provider);
+        const result = await replayPrompt(entry, {
+          provider,
+          model,
+          temperature: options.temperature ? parseFloat(options.temperature) : undefined,
+          maxTokens: options.maxTokens ? parseInt(options.maxTokens) : undefined,
+          save: options.save,
+        });
+        displayReplayResult(result);
+      }
+    } catch (error) {
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+// ============ TEST COMMANDS ============
+
+const testCommand = program
+  .command('test')
+  .description('Manage and run prompt test cases');
+
+testCommand
+  .command('add')
+  .description('Create a new test case')
+  .argument('[name]', 'test case name')
+  .option('-i, --interactive', 'create from interactive selection')
+  .action(async (name, options) => {
+    try {
+      if (options.interactive) {
+        const entries = await parseHistory(DEFAULT_HISTORY_PATH);
+        const sorted = entries.sort((a, b) => b.timestamp - a.timestamp);
+        const searchEngine = new HistorySearchEngine(sorted);
+        const results = searchEngine.search({ limit: 50 });
+        const selected = await interactiveSelect(results);
+        if (selected) {
+          await addTestFromEntry(selected.entry);
+        }
+      } else {
+        await addTestInteractive();
+      }
+    } catch (error) {
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+testCommand
+  .command('run')
+  .description('Run test cases')
+  .argument('[name]', 'test case name (runs all if not specified)')
+  .option('--provider <provider>', 'override provider')
+  .option('--model <model>', 'override model')
+  .option('--filter <pattern>', 'filter tests by name pattern')
+  .option('--tags <tags>', 'filter by tags (comma-separated)')
+  .option('-v, --verbose', 'show detailed output')
+  .option('--stop-on-failure', 'stop on first failure')
+  .action(async (name, options) => {
+    try {
+      if (name) {
+        await runSingleTestByName(name, {
+          provider: options.provider as Provider,
+          model: options.model,
+        });
+      } else {
+        await runTests({
+          filter: options.filter,
+          tags: options.tags?.split(','),
+          provider: options.provider as Provider,
+          model: options.model,
+          verbose: options.verbose,
+          stopOnFailure: options.stopOnFailure,
+        });
+      }
+    } catch (error) {
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+testCommand
+  .command('list')
+  .description('List all test cases')
+  .action(() => {
+    listTests();
+  });
+
+testCommand
+  .command('show')
+  .description('Show test case details')
+  .argument('<name>', 'test case name or ID')
+  .action((name) => {
+    showTest(name);
+  });
+
+testCommand
+  .command('delete')
+  .description('Delete a test case')
+  .argument('<name>', 'test case name or ID')
+  .action((name) => {
+    removeTest(name);
+  });
+
+// ============ COMPARE COMMAND ============
+
+program
+  .command('compare')
+  .description('Diff two prompt results')
+  .argument('<id1>', 'first result ID')
+  .argument('<id2>', 'second result ID')
+  .option('--side-by-side', 'show side-by-side comparison')
+  .action((id1, id2, options) => {
+    try {
+      const result1 = getPromptResult(id1);
+      const result2 = getPromptResult(id2);
+
+      if (!result1) {
+        console.log(chalk.red(`Result not found: ${id1}`));
+        process.exit(1);
+      }
+      if (!result2) {
+        console.log(chalk.red(`Result not found: ${id2}`));
+        process.exit(1);
+      }
+
+      if (options.sideBySide) {
+        displaySideBySide(result1, result2);
+      } else {
+        compareByIds(id1, id2);
+      }
+    } catch (error) {
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
+      process.exit(1);
+    }
+  });
+
+// ============ RESULTS COMMAND ============
+
+program
+  .command('results')
+  .description('List saved prompt results')
+  .option('-l, --limit <number>', 'number of results to show', '20')
+  .action((options) => {
+    try {
+      const results = getPromptResults(parseInt(options.limit));
+
+      if (results.length === 0) {
+        console.log(chalk.yellow('No results found. Use "prompthistory replay" to create some.'));
+        return;
+      }
+
+      console.log(chalk.bold.cyan(`\n📊 Saved Results (${results.length})`));
+      console.log(chalk.dim('─'.repeat(70)));
+
+      for (const result of results) {
+        const preview = result.prompt.substring(0, 60) + (result.prompt.length > 60 ? '...' : '');
+        console.log(
+          chalk.dim(result.id.substring(0, 20) + '...'),
+          chalk.cyan(`${result.provider}/${result.model}`)
+        );
+        console.log(chalk.dim(`  ${preview}`));
+        console.log(
+          chalk.dim(`  ${result.latencyMs}ms | ${result.totalTokens} tokens | ${new Date(result.timestamp).toLocaleString()}`)
+        );
+        console.log();
+      }
     } catch (error) {
       console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
       process.exit(1);

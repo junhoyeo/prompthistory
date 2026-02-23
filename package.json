@@ -25,7 +25,10 @@
     "history",
     "prompt",
     "search",
-    "fuzzy-search"
+    "fuzzy-search",
+    "testing",
+    "replay",
+    "llm"
   ],
   "author": "junhoyeo",
   "license": "MIT",
@@ -38,6 +41,7 @@
     "url": "https://github.com/junhoyeo/prompthistory/issues"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
     "@inquirer/prompts": "^8.2.0",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
@@ -45,6 +49,7 @@
     "commander": "^12.1.0",
     "date-fns": "^3.3.1",
     "fuse.js": "^7.0.0",
+    "openai": "^4.73.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {

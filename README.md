@@ -1,11 +1,11 @@
 # prompthistory
 
-> CLI tool to search and navigate your OpenCode prompt history
+> CLI tool to search, replay, test, and compare your OpenCode prompts
 
 <div align="center">
 
-[![npm Version](https://img.shields.io/npm/v/prompthistory?color=0073FF&labelColor=black&style=flat-square&logo=npm)](https://www.npmjs.com/package/prompthistory)
-[![npm Downloads](https://img.shields.io/npm/dt/prompthistory?color=0073FF&labelColor=black&style=flat-square)](https://www.npmjs.com/package/prompthistory)
+[![npm Version](https://img.shields.io/npm/v/%40junhoyeo%2Fprompthistory?color=0073FF&labelColor=black&style=flat-square&logo=npm)](https://www.npmjs.com/package/@junhoyeo/prompthistory)
+[![npm Downloads](https://img.shields.io/npm/dt/%40junhoyeo%2Fprompthistory?color=0073FF&labelColor=black&style=flat-square)](https://www.npmjs.com/package/@junhoyeo/prompthistory)
 [![GitHub Stars](https://img.shields.io/github/stars/junhoyeo/prompthistory?color=0073FF&labelColor=black&style=flat-square)](https://github.com/junhoyeo/prompthistory/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](https://github.com/junhoyeo/prompthistory/blob/main/LICENSE)
 
@@ -14,6 +14,9 @@
 ## Features
 
 - 🔍 **Fuzzy search** through all your prompts
+- 🔄 **Replay prompts** with different providers (OpenAI, Anthropic) and models
+- 🧪 **Test framework** - create test cases with expected patterns, run and track results
+- 📊 **Compare responses** - diff outputs from different models side-by-side
 - 📁 **Filter by project** - find prompts from specific projects
 - 📅 **Date range filtering** - search within time ranges
 - 🎨 **Beautiful output** - formatted tables with colors
@@ -36,40 +39,28 @@ pnpm add -g @junhoyeo/prompthistory
 bunx @junhoyeo/prompthistory
 ```
 
-## Usage
-
-### List recent prompts
+## Quick Start
 
 ```bash
-prompthistory list --limit 10
-```
+# Interactive mode - browse recent prompts
+prompthistory
 
-### Search by keyword
-
-```bash
+# Search for prompts
 prompthistory search "bug fix"
-prompthistory search "api"
-```
 
-### Filter by project
+# Replay a prompt with a different model
+prompthistory replay 1 --provider anthropic --model claude-sonnet-4-20250514
 
-```bash
-prompthistory search "refactor" --project tokscale
-```
-
-### Filter by date
-
-```bash
-prompthistory search "commit" --from 2026-01-01 --to 2026-01-13
-```
-
-### Show detailed information
-
-```bash
-prompthistory show 5
+# Create and run test cases
+prompthistory test add -i
+prompthistory test run
 ```
 
 ## Commands
+
+### `prompthistory` (default)
+
+Launch interactive mode to browse and select from recent prompts.
 
 ### `prompthistory search [query]`
 
@@ -83,6 +74,7 @@ Search through your prompt history with optional filters.
 - `--last-7d` - Filter to last 7 days
 - `-l, --limit <number>` - Limit number of results (default: 20)
 - `-u, --unique` - Show only unique prompts (deduplicate)
+- `--truncate` - Truncate long prompts in output
 - `-c, --copy` - Copy selected result to clipboard
 - `-i, --interactive` - Interactive mode with arrow key navigation
 - `--include-slash-commands` - Include slash commands in results (excluded by default)
@@ -113,8 +105,11 @@ List recent prompts without searching.
 **Options:**
 - `-l, --limit <number>` - Number of prompts to show (default: 10)
 - `-p, --project <project>` - Filter by project path
+- `-f, --from <date>` - Filter from date (YYYY-MM-DD)
+- `-t, --to <date>` - Filter to date (YYYY-MM-DD)
 - `--today` - Filter to today only
 - `--last-7d` - Filter to last 7 days
+- `--truncate` - Truncate long prompts in output
 - `--include-slash-commands` - Include slash commands
 
 **Examples:**
@@ -147,6 +142,126 @@ prompthistory show 3
 prompthistory show 3 --copy
 ```
 
+### `prompthistory replay <index>`
+
+Re-run a prompt with a different provider or model. Great for comparing responses across models.
+
+**Options:**
+- `--provider <provider>` - Provider to use: `openai`, `anthropic` (default: openai)
+- `--model <model>` - Model to use (defaults to provider's default)
+- `--temperature <temp>` - Temperature (0.0-2.0)
+- `--max-tokens <tokens>` - Max tokens in response
+- `-i, --interactive` - Interactive mode to select provider/model
+- `--no-save` - Do not save result to database
+
+**Examples:**
+
+```bash
+# Replay prompt 1 with default settings
+prompthistory replay 1
+
+# Replay with Anthropic Claude
+prompthistory replay 1 --provider anthropic --model claude-sonnet-4-20250514
+
+# Interactive selection of provider and model
+prompthistory replay 1 -i
+
+# Replay with custom temperature
+prompthistory replay 1 --provider openai --model gpt-4o --temperature 0.7
+```
+
+### `prompthistory test`
+
+Manage and run prompt test cases. Create reusable tests with expected patterns.
+
+#### `prompthistory test add [name]`
+
+Create a new test case.
+
+**Options:**
+- `-i, --interactive` - Create from interactive prompt selection
+
+**Examples:**
+
+```bash
+# Create test interactively from scratch
+prompthistory test add
+
+# Create test from an existing prompt
+prompthistory test add -i
+```
+
+#### `prompthistory test run [name]`
+
+Run test cases.
+
+**Options:**
+- `--provider <provider>` - Override provider
+- `--model <model>` - Override model
+- `--filter <pattern>` - Filter tests by name pattern
+- `--tags <tags>` - Filter by tags (comma-separated)
+- `-v, --verbose` - Show detailed output
+- `--stop-on-failure` - Stop on first failure
+
+**Examples:**
+
+```bash
+# Run all tests
+prompthistory test run
+
+# Run a specific test
+prompthistory test run "my-test"
+
+# Run with verbose output
+prompthistory test run -v
+
+# Run tests with specific tag
+prompthistory test run --tags api,auth
+```
+
+#### `prompthistory test list`
+
+List all test cases.
+
+#### `prompthistory test show <name>`
+
+Show detailed information about a test case.
+
+#### `prompthistory test delete <name>`
+
+Delete a test case.
+
+### `prompthistory compare <id1> <id2>`
+
+Compare two prompt results side-by-side with diff view.
+
+**Options:**
+- `--side-by-side` - Show side-by-side comparison instead of diff
+
+**Examples:**
+
+```bash
+# Diff two results
+prompthistory compare abc123 def456
+
+# Side-by-side view
+prompthistory compare abc123 def456 --side-by-side
+```
+
+### `prompthistory results`
+
+List saved prompt results from replays and tests.
+
+**Options:**
+- `-l, --limit <number>` - Number of results to show (default: 20)
+
+**Examples:**
+
+```bash
+prompthistory results
+prompthistory results --limit 50
+```
+
 ### `prompthistory export [query]`
 
 Export search results to a file or stdout.
@@ -172,6 +287,17 @@ prompthistory export --format csv --output prompts.csv
 
 # Export filtered results
 prompthistory export "api" --project my-project --format txt -o api-prompts.txt
+```
+
+## Configuration
+
+### Environment Variables
+
+For replay and test features, set your API keys:
+
+```bash
+export OPENAI_API_KEY="your-key"
+export ANTHROPIC_API_KEY="your-key"
 ```
 
 ## Data Source
@@ -205,6 +331,7 @@ bun run dev search "test"
 - **Runtime**: [Bun](https://bun.sh/) (required for `bun:sqlite`)
 - **Database**: [bun:sqlite](https://bun.sh/docs/api/sqlite) - Native SQLite bindings
 - **CLI Framework**: [Commander.js](https://github.com/tj/commander.js)
+- **AI Providers**: [OpenAI](https://github.com/openai/openai-node), [Anthropic](https://github.com/anthropics/anthropic-sdk-typescript)
 - **Fuzzy Search**: [Fuse.js](https://fusejs.io)
 - **Output Formatting**: [chalk](https://github.com/chalk/chalk), [cli-table3](https://github.com/cli-table/cli-table3)
 - **Interactive UI**: [@inquirer/prompts](https://github.com/SBoudrias/Inquirer.js)
